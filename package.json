@@ -14,14 +14,19 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.10",
+    "exceljs": "^4.3.0",
     "firebase": "^10.4.0",
     "react": "^18.2.0",
+    "react-csv": "^2.2.2",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
-    "recharts": "^2.8.0"
+    "recharts": "^2.8.0",
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
+    "@types/react-csv": "^1.1.6",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

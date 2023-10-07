@@ -9,20 +9,17 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from '../components/listItems';
 import Chart from '../components/Chart';
 import Deposits from '../components/Deposits';
 import Orders from '../components/Orders';
-
-
-
+import Button from '@mui/material/Button';
+import 'firebase/auth'; // Importa Firebase Authentication
+import {auth} from '../config/firebase-config'
 const drawerWidth: number = 240;
 
 interface AppBarProps extends MuiAppBarProps {
@@ -73,13 +70,28 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-// TODO remove, this demo shouldn't need to reset the theme.
+
+
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
     setOpen(!open);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      console.log('Sesión cerrada');
+      // Puedes redirigir al usuario a otra página aquí si lo deseas
+    } catch (error) {
+      if (typeof error === 'string') {
+        console.error('Error al cerrar la sesión: ', error);
+      } else {
+        console.error('Error desconocido al cerrar la sesión: ', error);
+      }
+    }
   };
 
   return (
@@ -92,18 +104,6 @@ export default function Dashboard() {
               pr: '24px', // keep right padding when drawer closed
             }}
           >
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: '36px',
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
             <Typography
               component="h1"
               variant="h6"
@@ -113,11 +113,9 @@ export default function Dashboard() {
             >
               Dashboard
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <Button color="inherit" onClick={handleLogout}>
+              <Typography>Cerrar sesión</Typography>
+            </Button>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>

@@ -2,41 +2,60 @@ import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { LineChart, Line, XAxis, YAxis, Label, ResponsiveContainer } from 'recharts';
 import Title from './Title';
-//import { db } from '../config/firebase-config';
 import firebase from 'firebase/compat/app';
-// Generate Sales Data
-function createData(time: string, amount?: number) {
-  return { time, amount };
-}
 
-const data = [
-  createData('00:00', 0),
-  createData('03:00', 300),
-  createData('06:00', 600),
-  createData('09:00', 800),
-  createData('12:00', 1500),
-  createData('15:00', 2000),
-  createData('18:00', 2400),
-  createData('21:00', 2400),
-  createData('24:00', undefined),
-];
 
 export default function Chart() {
-  const [usuarioActivo, setUsuarioActivo] = React.useState<firebase.User | null>(null); // Define usuarioActivo con el tipo adecuado
+  const [usuarioActivo, setUsuarioActivo] = React.useState<firebase.User | null>(null);
+  const [data, setData] = React.useState<unknown[]>([]); // Inicializa data como un arreglo vacío
+console.log(data)
+
+React.useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const snapshot = await firebase.firestore().collection('listaDifusion').get();
+      const newData: unknown[] = [];
+      const dayData: { [day: string]: number } = {}; // Objeto para agrupar datos por día
+
+      snapshot.forEach((doc) => {
+        const timestamp = doc.data().favoritos;
+        const date = new Date(timestamp.seconds * 1000);
+        const formattedDay = `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}, ${date.getFullYear()}`;
+
+        if (!dayData[formattedDay]) {
+          dayData[formattedDay] = 0;
+        }
+
+        dayData[formattedDay] += 1; // Incrementa la cantidad de usuarios para este día
+      });
+
+      // Convierte el objeto de datos por día en un arreglo de objetos
+      Object.entries(dayData).forEach(([day, amount]) => {
+        newData.push({
+          time: day,
+          amount,
+        });
+      });
+
+      setData(newData);
+    } catch (error) {
+      console.error('Error al obtener los datos de Firestore: ', error);
+    }
+  };
+
+  fetchData();
+}, []);
+
   React.useEffect(() => {
-    // Escucha el cambio de estado de autenticación
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Usuario autenticado, establece usuarioActivo
         setUsuarioActivo(user);
       } else {
-        // No hay usuario autenticado, usuarioActivo es null
         setUsuarioActivo(null)
       }
     });
 
     return () => {
-      // Limpia la suscripción al desmontar el componente
       unsubscribe();
     };
   }, []);
@@ -64,6 +83,7 @@ export default function Chart() {
           <YAxis
             stroke={theme.palette.text.secondary}
             style={theme.typography.body2}
+            domain={[0, 5]} // Establece el dominio del eje Y de 0 a 5
           >
             <Label
               angle={270}
@@ -74,7 +94,7 @@ export default function Chart() {
                 ...theme.typography.body1,
               }}
             >
-              Sales ($)
+              Users
             </Label>
           </YAxis>
           <Line
